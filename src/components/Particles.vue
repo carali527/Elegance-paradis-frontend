@@ -5,19 +5,14 @@
 <script setup>
 import { onMounted } from 'vue';
 
-const initParticles = (isDarkMode) => {
-  // const color = isDarkMode ? "#000000" : "#ffffff";
-  // const lineColor = isDarkMode ? "#1d1d1d" : "#ffffff";
-  const color = isDarkMode ? "#ffffff" : "#000000";
-  const lineColor = isDarkMode ? "#ffffff" : "#1d1d1d";
-
+const initParticles = () => {
   window.particlesJS('particles-container', {
     particles: {
       number: { value: 150, density: { enable: true, value_area: 800 } },
-      color: { value: color },
+      color: { value: "#000000" },
       shape: {
         type: "triangle",
-        stroke: { width: 0, color: color },
+        stroke: { width: 0, color: "#000000" },
         polygon: { nb_sides: 5 },
         image: { src: "img/github.svg", width: 100, height: 100 }
       },
@@ -34,7 +29,7 @@ const initParticles = (isDarkMode) => {
       line_linked: {
         enable: true,
         distance: 150,
-        color: lineColor,
+        color: "#1d1d1d",
         opacity: 0.4,
         width: 1
       },
@@ -69,10 +64,8 @@ const initParticles = (isDarkMode) => {
 };
 
 onMounted(() => {
-  const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
-
   const setParticles = () => {
-    initParticles(prefersDarkScheme.matches);
+    initParticles();
   };
 
   setParticles();
@@ -94,7 +87,7 @@ onMounted(() => {
 
 @media (prefers-color-scheme: dark) {
   #particles-container {
-    background-color: #ffffff;
+    background-color: transparent;
   }
 }
 

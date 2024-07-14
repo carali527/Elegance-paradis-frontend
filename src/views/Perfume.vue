@@ -138,7 +138,8 @@ const toggleAccordion = (index) => {
 };
 
 const addToCart = (productId) => {
-  userStore.addToCart(productId);
+  // userStore.addToCart(productId);
+  userStore.addToCart(1);
 };
 
 onMounted(() => {

@@ -2,10 +2,8 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-
+  background-color: #ffffff;
+  color: #213547;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -62,34 +60,9 @@ body {
   outline: unset;
 }
 
-.swiper-horizontal > .swiper-pagination-bullets .swiper-pagination-bullet, .swiper-pagination-horizontal.swiper-pagination-bullets .swiper-pagination-bullet {
-  background: #1d1d1d;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  button {
-    background-color: #ffffff;
-  }
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
     color: #213547;
     background-color: #ffffff;
-  }
-  button {
-    background-color: #ffffff;
-  }
-}
-
-@media not all and (min-resolution: 0.001dpcm) {
-  @supports (-webkit-appearance: none) {
-    main {
-      background: transparent; /* 確保 Safari 瀏覽器深色模式下的背景色 */
-    }
   }
 }
