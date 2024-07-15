@@ -69,8 +69,6 @@ onMounted(() => {
   };
 
   setParticles();
-
-  prefersDarkScheme.addEventListener("change", setParticles);
 });
 </script>
 

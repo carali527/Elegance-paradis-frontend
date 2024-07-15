@@ -7,7 +7,7 @@ import ShoppingCart from '@/views/ShoppingCart.vue';
 import WishList from '@/views/WishList.vue';
 
 const router = createRouter({
-  history: createWebHashHistory('/EleganceParadisFrontend/'),
+  history: createWebHashHistory('/elegance-paradis-frontend/'),
   routes: [
     {
       path: '/',
