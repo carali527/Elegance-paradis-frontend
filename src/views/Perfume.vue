@@ -68,9 +68,9 @@ import { ref, onMounted } from 'vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/swiper-bundle.css';
 import { Navigation, Pagination } from 'swiper/modules';
-import { useMemberStore } from '../stores/member';
+import { useUserStore } from '../stores/userStore';
 
-const userStore = useMemberStore();
+const userStore = useUserStore();
 const product = ref({});
 const productImages = ref([]);
 const sizes = ref([]);

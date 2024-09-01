@@ -1,5 +1,5 @@
 # Intro
-This project using Vue 3 and only for practicing.  
+This project is still in progress and not yet complete. The main project will be hosted on Azure, and this section only provides a reference for the coding methods.
 
 ## Project Setup
 

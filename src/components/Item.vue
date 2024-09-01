@@ -1,13 +1,14 @@
 <template>
     <div class="products__item" ref="productItems">
       <div class="products__item-stick">
-        <a href="#/perfume">
-          <img :src="product.image" :alt="product.name">
-          <h3>{{ product.name }}</h3>
+        <a :href="`/perfume/${product.productId}`">
+          <i class="fa-regular fa-star"></i>
+          <img :src="product.productImageUrl" :alt="product.productName">
+          <h3>{{ product.productName }}</h3>
           <span>{{ product.description }}</span>
         </a>
-        <span>NT$ {{ product.price }}</span>
-        <button class="add-to-bag" @click="addToCart(product.id)">
+        <span>NT$ {{ product.unitPrice }}</span>
+        <button class="add-to-bag" @click="addToCart(product.productId)">
           <span>新增到購物車</span>
         </button>
       </div>
@@ -15,9 +16,8 @@
 </template>
 
 <script setup>
-import { useMemberStore } from '../stores/member';
-const userStore = useMemberStore();
-
+import { useUserStore } from '../stores/userStore';
+const userStore = useUserStore();
 const props = defineProps({
   product: Object
 })
@@ -43,6 +43,32 @@ const addToCart = (product) => {
     img {
       border-bottom: 1px solid #1d1d1d;
       transform: scale(1.1);
+    }
+  }
+  a {
+    position: relative;
+    color: white;
+    i.fa-star {
+      position: absolute;
+      right: 5px;
+      top: 5px;
+    }
+  }
+  .add-to-bag {
+    span {
+      &::after {
+        content: '';
+        display: block;
+        width: 0;
+        height: 2px;
+        background: #1d1d1d;
+        transition: width 0.3s;
+        margin-top: 5px;
+      }
+
+      &:hover::after {
+        width: 100%;
+      }
     }
   }
 }

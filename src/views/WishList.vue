@@ -20,7 +20,7 @@ const products = ref([
     name: '香奈兒嘉柏麗香水1',
     description: '香奈兒嘉柏麗隨機噴香霧',
     price: '2,230',
-    image: 'https://www.chanel.com/images//t_one//w_0.51,h_0.51,c_crop/q_auto:good,f_autoplus,fl_lossy,dpr_1.1/w_840/gabrielle-chanel-hair-mist-1-35fl-oz--packshot-default-120870-9545536995358.jpg',
+    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
     isFaded: false
   },
   {
@@ -28,7 +28,7 @@ const products = ref([
     name: '香奈兒嘉柏麗香水2',
     description: '香奈兒嘉柏麗流金隨身香水',
     price: '5,700',
-    image: 'https://www.chanel.com/images//t_one//w_0.51,h_0.51,c_crop/q_auto:good,f_autoplus,fl_lossy,dpr_1.1/w_840/gabrielle-chanel-hair-mist-1-35fl-oz--packshot-default-120870-9545536995358.jpg',
+    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
     isFaded: false
   },
   {
@@ -36,7 +36,7 @@ const products = ref([
     name: '香奈兒嘉柏麗香水3',
     description: '香奈兒嘉柏麗流金香水',
     price: '4,800',
-    image: 'https://www.chanel.com/images//t_one//w_0.51,h_0.51,c_crop/q_auto:good,f_autoplus,fl_lossy,dpr_1.1/w_840/gabrielle-chanel-hair-mist-1-35fl-oz--packshot-default-120870-9545536995358.jpg',
+    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
     isFaded: false
   },
   {
@@ -44,7 +44,7 @@ const products = ref([
     name: '香奈兒嘉柏麗香水3',
     description: '香奈兒嘉柏麗流金香水',
     price: '4,800',
-    image: 'https://www.chanel.com/images//t_one//w_0.51,h_0.51,c_crop/q_auto:good,f_autoplus,fl_lossy,dpr_1.1/w_840/gabrielle-chanel-hair-mist-1-35fl-oz--packshot-default-120870-9545536995358.jpg',
+    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
     isFaded: false
   },
   {
@@ -52,7 +52,7 @@ const products = ref([
     name: '香奈兒嘉柏麗香水3',
     description: '香奈兒嘉柏麗流金香水',
     price: '4,800',
-    image: 'https://www.chanel.com/images//t_one//w_0.51,h_0.51,c_crop/q_auto:good,f_autoplus,fl_lossy,dpr_1.1/w_840/gabrielle-chanel-hair-mist-1-35fl-oz--packshot-default-120870-9545536995358.jpg',
+    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
     isFaded: false
   },
   {
@@ -60,7 +60,7 @@ const products = ref([
     name: '香奈兒嘉柏麗香水3',
     description: '香奈兒嘉柏麗流金香水',
     price: '4,800',
-    image: 'https://www.chanel.com/images//t_one//w_0.51,h_0.51,c_crop/q_auto:good,f_autoplus,fl_lossy,dpr_1.1/w_840/gabrielle-chanel-hair-mist-1-35fl-oz--packshot-default-120870-9545536995358.jpg',
+    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
     isFaded: false
   },
   {
@@ -68,7 +68,7 @@ const products = ref([
     name: '香奈兒嘉柏麗香水3',
     description: '香奈兒嘉柏麗流金香水',
     price: '4,800',
-    image: 'https://www.chanel.com/images//t_one//w_0.51,h_0.51,c_crop/q_auto:good,f_autoplus,fl_lossy,dpr_1.1/w_840/gabrielle-chanel-hair-mist-1-35fl-oz--packshot-default-120870-9545536995358.jpg',
+    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
     isFaded: false
   },
 ]);

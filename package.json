@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host localhost",
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "vite build && gh-pages -d dist"
@@ -16,6 +16,7 @@
     "rellax": "^1.12.1",
     "swiper": "^11.1.4",
     "vue": "^3.4.21",
+    "vue-cookies": "^1.8.4",
     "vue-router": "^4.0.13"
   },
   "devDependencies": {

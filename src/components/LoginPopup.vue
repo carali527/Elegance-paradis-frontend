@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="popup" @click="hidePopup">
     <div class="popup__content" @click.stop>
       <h2>帳戶</h2>
       <div>
@@ -9,18 +9,20 @@
       <div v-if="activeTab === 'login'">
         <h3>歡迎回來</h3>
         <div class="popup__form--login">
-          <input type="text" oninput="value=value.replace(/[-<>;\\'&quot;]/g,'')" placeholder="電子郵件或手機號碼" />
-          <input type="password" oninput="value=value.replace(/[-<>;\\'&quot;]/g,'')" placeholder="密碼" />
+          <input type="text" v-model="loginEmail"  oninput="value=value.replace(/[-<>;\\'&quot;]/g,'')" placeholder="電子郵件" @input="clearError" :class="{ 'error': loginEmailError }"/>
+          <span v-if="loginEmailError" class="error">{{ loginEmailError }}</span>
+          <input type="password" v-model="loginPassword" oninput="value=value.replace(/[-<>;\\'&quot;]/g,'')" placeholder="密碼" :class="{ 'error': loginPasswordError }"/>
+          <span v-if="loginPasswordError" class="error">{{ loginPasswordError }}</span>
         </div>
-        <p class="popup__form--remember">忘記密碼？</p>
+        <p class="popup__form--remember" @click="showForgetPasswordPopup">忘記密碼？</p>
         <!-- <input type="checkbox" id="remember" /> -->
         <!-- <label for="remember">記住我（可選項）</label> -->
         <div class="form--btn">
-          <button @click="login">登入</button>
+          <button @click="handleLogin">登入</button>
           <p>或</p>
           <button class="google-signin">
-            <img src="../assets/google_signin.svg" alt="">
-            Google
+            <img src="/images/google_signin.svg" alt="">
+            使用 Google 帳號登入
           </button>
         </div>
       </div>
@@ -32,19 +34,19 @@
           <span v-if="registerNameError" class="error">{{ registerNameError }}</span>
           <input v-model="registerPhone" type="text" placeholder="電話號碼" @blur="validatePhone(registerPhone)" :class="{ 'error': registerPhoneError }"/>
           <span v-if="registerPhoneError" class="error">{{ registerPhoneError }}</span>
-          <input v-model="registerEmail" type="text" placeholder="電子郵件" @blur="validateEmail(registerEmail)" :class="{ 'error': registerEmailError }"/>
+          <input v-model="registerEmail" type="text" placeholder="電子郵件" @blur="validateEmail('register',registerEmail)" @input="clearError" :class="{ 'error': registerEmailError }"/>
           <span v-if="registerEmailError" class="error">{{ registerEmailError }}</span>
-          <input v-model="registerPassword" type="password" placeholder="密碼" @blur="validatePassword(registerPassword)" :class="{ 'error': registerPasswordError }"/>
+          <input v-model="registerPassword" type="password" placeholder="密碼" @blur="validatePassword('register',registerPassword)" @input="clearError" :class="{ 'error': registerPasswordError }"/>
           <span v-if="registerPasswordError" class="error">{{ registerPasswordError }}</span>
-          <input v-model="registerConfirmPassword" type="password" placeholder="確認密碼" @blur="validateConfirmPassword(registerPassword, registerConfirmPassword)" :class="{ 'error': registerConfirmPasswordError }"/>
+          <input v-model="registerConfirmPassword" type="password" placeholder="確認密碼" @blur="validateConfirmPassword(registerPassword, registerConfirmPassword)" @input="clearError" :class="{ 'error': registerConfirmPasswordError }"/>
           <span v-if="registerConfirmPasswordError" class="error">{{ registerConfirmPasswordError }}</span>
         </div>
         <div class="form--btn">
           <button @click="register">註冊</button>
           <p>或</p>
           <button class="google-signin">
-            <img src="../assets/google_signin.svg" alt="">
-            Google
+            <img src="/images/google_signin.svg" alt="">
+            使用 Google 帳號登入
           </button>
         </div>
       </div>
@@ -56,7 +58,7 @@
           <g id="_4897" data-name="4897">
             <g id="close-2">
                 <g id="_6076" data-name="6076">
-                    <rect id="_7094" data-name="矩形 7094" class="cls-1" width="24" height="24" opacity="0"></rect>
+                    <rect id="_7094" data-name="7094" class="cls-1" width="24" height="24" opacity="0"></rect>
                 </g>
                 <g id="_4062" data-name="4062">
                     <g id="_1994" data-name="1994">
@@ -76,9 +78,11 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useMemberStore } from '../stores/member';
-
-const userStore = useMemberStore();
+import { useUserStore } from '../stores/userStore';
+import { createAccount, login } from '@/api/index';
+import { useRouter } from 'vue-router';
+ const router = useRouter();
+const userStore = useUserStore();
 const activeTab = ref('login');
 
 // 登入表單
@@ -108,16 +112,22 @@ const setActiveTab = (tab) => {
   activeTab.value = tab;
 };
 
-const validateEmail = (email) => {
+const validateEmail = (type, email) => {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  loginEmailError.value = emailPattern.test(email) ? '' : '無效的電子郵件地址';
-  registerEmailError.value = emailPattern.test(email) ? '' : '無效的電子郵件地址';
+  if(type === 'login'){
+    loginEmailError.value = emailPattern.test(email) ? '' : '電子郵件地址錯誤';
+  }else {
+    registerEmailError.value = emailPattern.test(email) ? '' : '無效的電子郵件地址';
+  }
 };
 
-const validatePassword = (password) => {
-  const passwordPattern = /^.{6,20}$/;
-  loginPasswordError.value = passwordPattern.test(password) ? '' : '密碼必須包含6-20個字符';
-  registerPasswordError.value = passwordPattern.test(password) ? '' : '密碼必須包含6-20個字符';
+const validatePassword = (type, password) => {
+  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{6,20}$/;
+  if(type === 'login'){
+    loginPasswordError.value = passwordPattern.test(password) ? '' : '密碼錯誤錯誤';
+  }else {
+    registerPasswordError.value = passwordPattern.test(password) ? '' : '密碼必須包含6-20個字符，且至少包含一個大寫字母、一個小寫字母和一個符號';
+  }
 };
 
 const validateConfirmPassword = (password, confirmPassword) => {
@@ -129,23 +139,83 @@ const validateName = (name) => {
 };
 
 const validatePhone = (phone) => {
-  const phonePattern = /^[0-9]{10,12}$/;
+  const phonePattern = /^[0-9+\-]+$/;
   registerPhoneError.value = phonePattern.test(phone) ? '' : '無效的電話號碼';
 };
 
-// 登入函數
-const login = () => {
-  validateEmail(loginEmail.value);
-  validatePassword(loginPassword.value);
+const clearError = () => {
+  loginEmailError.value = '';
+  registerEmailError.value = '';
+  loginPasswordError.value = '';
+  registerPasswordError.value = '';
+  registerConfirmPasswordError.value = '';
+};
 
+const handleLogin = async () => {
+  validateEmail('login',loginEmail.value);
+  validatePassword('login',loginPassword.value);
   if (!loginEmailError.value && !loginPasswordError.value) {
-    // 處理登入邏輯
+    try {
+      const response = await login({
+        email: loginEmail.value,
+        password: loginPassword.value,
+      });
+
+      if (response.accountStatus === 1){
+        userStore.isMemberPopupVisible(false);
+        userStore.showValidateEmailPopup(true);
+        userStore.unverifiedEmail({status: response.accountStatus, email: loginEmail.value});
+      }else {
+        window.location.reload();
+      }
+    } catch (error) {
+      userStore.closeAllPopup();
+      userStore.isAlertMessagesShow({visible: true, message: error.response.data, status: false})
+    }
   }
 };
 
-const register = () => {
-  // 處理註冊邏輯
-};
+const register = async () => {
+  if (!registerNameError.value && !registerPhoneError.value && 
+      !registerEmailError.value && !registerPasswordError.value && 
+      !registerConfirmPasswordError.value) {
+    try {
+      await createAccount({
+        name: registerName.value,
+        mobile: registerPhone.value,
+        email: registerEmail.value,
+        password: registerPassword.value,
+        confirmedPassword: registerConfirmPassword.value
+      });
+
+      const response = await login({
+        email: registerEmail.value,
+        password: registerPassword.value,
+      });
+
+      if (response.accountStatus === 1){
+        userStore.isMemberPopupVisible(false);
+        userStore.showValidateEmailPopup(true);
+        userStore.unverifiedEmail({status: response.accountStatus, email: registerEmail.value});
+      }else {
+        window.location.reload();
+      }
+    } catch (error) {
+      userStore.closeAllPopup();
+      userStore.isAlertMessagesShow({visible: true, message: error.response.data, status: false});
+      setTimeout(() => {
+        router.replace('/').then(() => {
+          window.location.reload();
+        });
+      }, 500);
+    }
+  }
+}
+
+const showForgetPasswordPopup = () => {
+  userStore.closeAllPopup();
+  userStore.isForgetPasswordPopupVisible(true);
+}
 </script>
 
 <style lang="scss" scoped>
@@ -213,6 +283,7 @@ button {
     font-size: 14px;
     &.error {
       margin-bottom: 0px;
+      border: 1px solid #ff5b74;
     }
     &:focus {
       border: .5px solid;

@@ -1,23 +1,25 @@
 <template>
   <Particlesa />
   <section class="section__img" v-bg-parallax="[25, 75]">
-    <p class="section__title section__title--headline">香奈兒</p>
+    <p class="section__title section__title--headline">EleganceParadis</p>
   </section>
   <section>
-    <p class="section__title">Chanel Fragrance, Elevate Your Elegance</p>
+    <p class="section__title">EleganceParadis Fragrance, Elevate Your Elegance</p>
   </section>
-  <section v-for="category in categories" :key="category.id" class="section__img" v-bg-parallax="[45, 100]" :style="{ backgroundImage: `url(${category.imageURL})` }">
-    <p class="section__title section__title--headline">{{ category.name }}</p>
+  <section v-for="category in userStore.allCategories" :key="category.id" class="section__img" v-bg-parallax="[45, 100]" :style="{ backgroundImage: `url(${category.imageURL})` }">
+    <div class="section__title--bg">
+      <p class="section__title section__title--headline">{{ category.name }}</p>
+    </div>
   </section>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue';
 import Particlesa from '../components/Particles.vue';
-import { useMemberStore } from '../stores/member';
+import { useUserStore } from '../stores/userStore';
 
 const requestAnimFrame = window.requestAnimationFrame;
-const userStore = useMemberStore();
+const userStore = useUserStore();
 const categories = ref([]);
 
 const globals = {
@@ -138,10 +140,10 @@ const bgParallaxDirective = {
 const instance = getCurrentInstance();
 instance.appContext.app.directive('bg-parallax', bgParallaxDirective);
 
-const loadCategories = async () => {
-  await userStore.fetchCategories();
-  categories.value = userStore.allCategories;
-};
+// const loadCategories = async () => {
+//   await userStore.fetchCategories();
+//   categories.value = userStore.allCategories;
+// };
 
 onMounted(() => {
   if (typeof window._parallax === 'undefined') {
@@ -152,7 +154,7 @@ onMounted(() => {
     };
   }
   forceUpdate();
-  loadCategories();
+  // loadCategories();
 });
 
 onUnmounted(() => {
@@ -181,6 +183,12 @@ section {
   font-weight: 900;
 }
 
+.section__title--bg {
+  background: rgba(245, 245, 245, 0.6);
+  padding: 5px 30px;
+  border-radius: 10px;
+}
+
 .section__title--headline::before {
   display: block;
   font-size: 1.125rem;
@@ -192,14 +200,14 @@ section {
   &:first-of-type {
     color: #ffffff;
     background-position: center;
-    background-image: url('https://www.chanel.com/puls-img/c_limit,w_1920/q_auto:good,dpr_auto,f_auto/1717505333162-onehpcorpoprelaunchslidingherodesktop2880x1260pxeditajpg_1260x2880.jpg');
+    background-image: url('https://eleganceparadisapp.azurewebsites.net/images/perfume_kv.webp');
     p {
       color: #ffffff;
     }
   }
-  &:not(:first-of-type) {
-    color: #1d1d1d;
-  }
+  // &:not(:first-of-type) {
+  //   color: #1d1d1d;
+  // }
 }
 
 @media (max-width: 1200px) {

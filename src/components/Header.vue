@@ -4,17 +4,30 @@
       <div class="header__icons">
         <span class="header__menu-icon" @click="toggleMenu"><i class="fas fa-bars"></i></span>
       </div>
-      <a href="#" class="header__logo">
+      <a href="/" class="header__logo">
         <span>Elegance Paradis</span>
       </a>
       <div>
         <ul class="nav-right">
-          <li @mouseover="activeMemberDropdown = true" @mouseleave="activeMemberDropdown = false">
-            <span class="header__icon" @click="showMemberPopup"><i class="fa-regular fa-user"></i></span>
+          <li v-if="!userStore.userInfo">
+            <span class="header__icon" @click="showMemberPopup">
+              <i class="fa-regular fa-user"></i>
+            </span>
+          </li>
+          <li v-if="userStore.userInfo" @mouseover="activeMemberDropdown = true" @mouseleave="activeMemberDropdown = false" @click="toggleMemberDropdown"> 
+            <span class="header__icon"> 
+              <i class="fa fa-user"></i> 
+            </span> 
+            <div v-if="activeMemberDropdown" class="member-dropdown"> 
+              <a href="/account">會員帳號</a> 
+              <a href="/orders">訂單帳號</a> 
+              <button @click="handleLogout">登出</button> 
+            </div> 
           </li>
           <li>
-            <a href="#/cart" class="header__icon"><i class="fas fa-shopping-bag"></i></a>
-            <span class="header__count" v-if="userStore.cart > 0">{{ userStore.cart }}</span>
+            <a href="/cart" class="header__icon"><i class="fas fa-shopping-bag"></i></a>
+            <span class="header__count" v-if="userStore.cart.length > 0 && userStore.cart.length <= 99 ">{{ userStore.cart.length }}</span>
+            <span class="header__count" v-if="userStore.cart.length >= 100">99+</span>
           </li>
         </ul>
       </div>
@@ -22,11 +35,11 @@
     <nav :class="{ 'nav__item--hidden': isNavItemHidden && !isMobile, 'nav__item--active': isMenuOpen }">
       <ul class="nav__links">
         <li v-for="category in userStore.allCategories" :key="category.id" class="nav__item" @mouseover="activeDropdown = category.id" @mouseleave="activeDropdown = null">
-          <a class="nav__link" href="#">{{ category.name }}</a>
+          <a class="nav__link" :href="`/fragrances/${category.id}`">{{ category.name }}</a>
           <div class="nav__dropdown" v-if="activeDropdown === category.id || isMobile">
             <ul>
               <li v-for="subCategory in category.subCategory" :key="subCategory.id">
-                <a href="#/perfume" @click="closeMenuOnMobile">{{ subCategory.name }}</a>
+                <a :href="`/fragrances/${subCategory.id}`" @click="closeMenuOnMobile">{{ subCategory.name }}</a>
               </li>
             </ul>
           </div>
@@ -38,9 +51,11 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useMemberStore } from '../stores/member';
-
-const userStore = useMemberStore();
+import { useUserStore } from '../stores/userStore';
+import { logout } from '@/api/index';
+import { useRouter } from 'vue-router';
+const router = useRouter();
+const userStore = useUserStore();
 const isMenuOpen = ref(false);
 const activeDropdown = ref(null);
 const activeMemberDropdown = ref(false);
@@ -77,6 +92,13 @@ const handleScroll = () => {
   }
   lastScrollY = currentScrollY;
 };
+
+const handleLogout = async () => {
+  await logout(localStorage.getItem('refreshToken'))
+  router.replace('/').then(() => {
+    window.location.reload();
+  });
+}
 
 onMounted(() => {
   updateIsMobile();
@@ -115,7 +137,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   max-width: 83.875rem;
-  padding: 10px;
+  padding: 15px;
 }
 
 .header__logo {
@@ -167,7 +189,7 @@ ul.nav-right {
       color: #fff;
       font-size: 12px;
       font-weight: 500;
-      min-width: 18px;
+      min-width: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -175,6 +197,28 @@ ul.nav-right {
       top: -5px;
       right: -13px;
       line-height: 20px;
+    }
+  }
+}
+
+.member-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  text-wrap: nowrap;
+  border-radius: 5px;
+  a {
+    color: #1d1d1d;
+    text-decoration: none;
+    padding: 5px 20px;
+    &:last-of-type {
+      border-bottom: none;
     }
   }
 }
@@ -194,20 +238,23 @@ ul.nav-right {
     font-weight: 500;
     text-transform: uppercase;
     position: relative;
+  }
+}
 
-    &::after {
-      content: '';
-      display: block;
-      width: 0;
-      height: 2px;
-      background: #1d1d1d;
-      transition: width 0.3s;
-      margin-top: 5px;
-    }
+.nav__links a,
+.member-dropdown a {
+  &::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 2px;
+    background: #1d1d1d;
+    transition: width 0.3s;
+    margin-top: 5px;
+  }
 
-    &:hover::after {
-      width: 100%;
-    }
+  &:hover::after {
+    width: 100%;
   }
 }
 

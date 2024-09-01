@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ 'login-popup': memberStore.popupMemberVisible }">
+  <div :class="{ 'showPopup': userStore.memberPopupVisible || userStore.validateEmailPopupVisible }">
     <Header />
     <main>
       <router-view />
@@ -9,17 +9,23 @@
       <i class="fas fa-chevron-up"></i>
     </button>
   </div>
-  <LoginPopup v-if="memberStore.popupMemberVisible" />
+  <LoginPopup v-if="userStore.memberPopupVisible" />
+  <ValidateTheEmail v-if="userStore.validateEmailPopupVisible" />
+  <ForgetPasswordPopup v-if="userStore.forgetPasswordPopupVisible" />
+  <AlertMessages v-if="userStore.alertMessagesVisible" :message="userStore.alertMessages" :status="userStore.alertMessagesStatus"/>
 </template>
 
 <script setup>
 import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
 import LoginPopup from './components/LoginPopup.vue'
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useMemberStore } from './stores/member';
+import ValidateTheEmail from './components/ValidateTheEmail.vue'
+import ForgetPasswordPopup from './components/ForgetPasswordPopup.vue'
+import AlertMessages from './components/AlertMessages.vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import { useUserStore } from './stores/userStore';
 
-const memberStore = useMemberStore();
+const userStore = useUserStore();
 const isMobile = ref(false);
 const isNavItemHidden = ref(false);
 const showBackToTop = ref(false);
@@ -47,10 +53,28 @@ const scrollToTop = () => {
   });
 };
 
-onMounted(() => {
+const isPopupVisible = computed(() => userStore.validateEmailPopupVisible)
+
+watch(isPopupVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = ''
+  }
+})
+
+onMounted(async() => {
   updateIsMobile();
   window.addEventListener('resize', updateIsMobile);
   window.addEventListener('scroll', handleScroll);
+  const accessToken = localStorage.getItem('accessToken');
+  if (accessToken) {
+    userStore.setAccessToken(accessToken);  // 確保 accessToken 是最新的
+    userStore.fetchUserInfo();
+  }
+  if (userStore.validateEmailPopupVisible) {
+    document.body.style.overflow = 'hidden'
+  } 
 });
 
 onUnmounted(() => {
@@ -62,9 +86,9 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 main {
-  padding-top: 120px;
+  padding-top: 145px;
 }
-.login-popup {
+.showPopup {
   overflow: hidden;
 }
 .back-to-top {
@@ -91,7 +115,7 @@ main {
 
 @media (max-width: 768px) {
   main {
-    padding-top: 70px;
+    padding-top: 92px;
   }
 }
 </style>

@@ -4,14 +4,14 @@
       <div class="footer__section">
         <h4>瀏覽 EleganceParadis</h4>
         <ul>
-          <li><a href="#">男性香氛</a></li>
-          <li><a href="#">女性香氛</a></li>
+          <li><a href="/fragrances/1">男性香氛</a></li>
+          <li><a href="/fragrances/2">女性香氛</a></li>
         </ul>
       </div>
       <div class="footer__section">
         <h4>線上服務</h4>
         <ul>
-          <li><a href="#">我的帳戶</a></li>
+          <li><a href="/account">我的帳戶</a></li>
           <li><a href="#">常見問題</a></li>
         </ul>
       </div>

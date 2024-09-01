@@ -21,11 +21,14 @@
 <script setup>
 import Item from '../components/Item.vue'
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useMemberStore } from '../stores/member';
+import { useUserStore } from '../stores/userStore';
+import { useRoute } from 'vue-router'
 
-const userStore = useMemberStore();
+const userStore = useUserStore();
 const productList = ref(null);
 const productItems = ref([]);
+const route = useRoute();
+const fragranceId = route.params.id;
 
 const handleScroll = () => {
   const windowHeight = window.innerHeight;
@@ -45,7 +48,7 @@ const handleScroll = () => {
 };
 
 onMounted(() => {
-  userStore.fetchAllProducts();
+  userStore.fetchAllProducts(fragranceId);
   window.addEventListener('scroll', handleScroll);
   handleScroll();
 });
@@ -74,8 +77,8 @@ onUnmounted(() => {
         }
       }
       img {
-        width: 50px;
-        height: 50px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
       }
       p {

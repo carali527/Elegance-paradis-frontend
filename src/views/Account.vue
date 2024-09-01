@@ -15,16 +15,16 @@
         <div class="form-section__group">
           <label for="email">電子郵件</label>
           <div class="form-section__group-input" :class="{ 'error': changeEmailError }">
-            <input v-model="contactInfo.email" type="email" id="email" placeholder="電子郵件" oninput="value=value.replace(/[-<>;\\'&quot;]/g,'')" @blur="validateEmail(contactInfo.email)" />
+            <input v-model="personalInfo.email" type="email" id="email" placeholder="電子郵件" oninput="value=value.replace(/[-<>;\\'&quot;]/g,'')" @blur="validateEmail(personalInfo.email)" />
             <div>
               <span v-if="changeEmailError" class="error">{{ changeEmailError }}</span>
             </div>
           </div>
         </div>
         <div class="form-section__group">
-          <label for="phoneNumber">手機號碼</label>
+          <label for="mobile">手機號碼</label>
           <div class="form-section__group-input" :class="{ 'error': changePhoneError }">
-            <input v-model="contactInfo.phoneNumber" type="text" placeholder="電話號碼" oninput="value=value.replace(/[-<>;\\'&quot;]/g,'')" @blur="validatePhone(contactInfo.phoneNumber)" />
+            <input v-model="personalInfo.mobile" type="text" placeholder="電話號碼" oninput="value=value.replace(/[-<>;\\'&quot;]/g,'')" @blur="validatePhone(personalInfo.mobile)" />
             <div>
               <span v-if="changePhoneError" class="error">{{ changePhoneError }}</span>
             </div>
@@ -46,7 +46,10 @@
         <div class="form-section__group">
           <label for="newPassword">新的密碼</label>
           <div class="form-section__group-input">
-            <input v-model="passwords.newPassword" type="password" id="newPassword" placeholder="新的密碼" @blur="validatePassword(registerPassword)" oninput="value=value.replace(/[-<>;\\'&quot;]/g,'')"/>
+            <input v-model="passwords.newPassword" type="password" id="newPassword" placeholder="新的密碼" @blur="validatePassword(registerPassword)" oninput="value=value.replace(/[-<>;\\'&quot;]/g,'')" :class="{ 'error': changePasswordError }"/>
+            <div>
+              <span v-if="changePasswordError" class="error">{{ changePasswordError }}</span>
+            </div>
           </div>
         </div>
         <button type="submit" class="form-section__button">更改密碼</button>
@@ -56,22 +59,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import { useUserStore } from '../stores/userStore';
+import { updateCustomerPassword } from '@/api/index';
 
+const userStore = useUserStore();
 const changeNameError = ref('');
 const changePhoneError = ref('');
 const changeEmailError = ref('');
+const changePasswordError = ref('');
+
 const personalInfo = ref({
-  name: 'cc',
-  birthYear: '2004',
-  birthMonth: '3',
-  birthDay: '5'
+  id:'',
+  name: '',
+  email: '',
+  mobile: ''
 });
 
-const contactInfo = ref({
-  email: '34342435ddw@gmail.com',
-  phoneNumber: '987864643',
-});
+watch(() => userStore.userInfo, (newUserInfo) => {
+  if (newUserInfo) {
+    personalInfo.value.id = newUserInfo.accountId;
+    personalInfo.value.name = newUserInfo.name;
+    personalInfo.value.email = newUserInfo.email;
+    personalInfo.value.mobile = newUserInfo.mobile;
+  }
+}, { immediate: true });
 
 const passwords = ref({
   currentPassword: '',
@@ -84,8 +96,8 @@ const validateEmail = (email) => {
 };
 
 const validatePassword = (password) => {
-  const passwordPattern = /^.{6,20}$/;
-  changePasswordError.value = passwordPattern.test(password) ? '' : '密碼必須包含6-20個字符';
+  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{6,20}$/;
+  changePasswordError.value = passwordPattern.test(password) ? '' : '密碼必須包含6-20個字符，且至少包含一個大寫字母、一個小寫字母和一個符號';
 };
 
 const validateName = (name) => {
@@ -93,17 +105,46 @@ const validateName = (name) => {
 };
 
 const validatePhone = (phone) => {
-  const phonePattern = /^[0-9]{10,12}$/;
+  const phonePattern = /^[0-9+\-]+$/;
   changePhoneError.value = phonePattern.test(phone) ? '' : '無效的電話號碼';
 };
 
-const updatePersonalInfo = () => {
-  console.log('Updating personal info:', personalInfo.value);
+const updatePersonalInfo = async () => {
+  validateName(personalInfo.value.name);
+  validateEmail(personalInfo.value.email);
+  validatePhone(personalInfo.value.mobile);
+
+  if (!changeNameError.value && !changeEmailError.value && !changePhoneError.value) {
+    try {
+      await userStore.updateCustomerInfo(personalInfo.value.id, {
+        accountId: personalInfo.value.id,
+        name: personalInfo.value.name,
+        email: personalInfo.value.email,
+        mobile: personalInfo.value.mobile
+      });
+      userStore.isAlertMessagesShow({visible: true, message: '個人資料更新成功', status: true});
+    } catch (error) {
+      console.error('個人資料更新失敗', error);
+    }
+  }
 };
 
-const updatePassword = () => {
-  console.log('Updating password:', passwords.value);
-};
+const updatePassword = async () => {
+  validatePassword(passwords.value.newPassword);
+  if (!changePasswordError.value) {
+    const updateData = {
+      accountId: personalInfo.value.id,
+      oldPassword: passwords.value.currentPassword,
+      newPassword: passwords.value.newPassword
+    };
+    try {
+      await updateCustomerPassword(personalInfo.value.id, updateData);
+      userStore.isAlertMessagesShow({visible: true, message: '密碼更新成功', status: true});
+    } catch (error) {
+      console.error('密碼更新失敗', error.response?.data || error);
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>

@@ -39,7 +39,7 @@
     <div class="cart__payment">
       <h2>付款方式</h2>
       <div class="cart__payment-methods">
-        <img src="../assets/paymethod.webp" alt="creditcard" />
+        <!-- <img src="../assets/paymethod.webp" alt="creditcard" /> -->
       </div>
       <p>您的信用卡資訊安全無虞。所有資訊皆受安全通訊端層(SSL)技術妥善防護。</p>
     </div>
