@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="forgetPassword-container">
     <div class="svg__container">
       <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
         viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
@@ -352,7 +352,7 @@ const changePassword = () => {
 </script>
 
 <style lang="scss" scoped>
-.container {
+.forgetPassword-container {
   max-width: 600px;
   margin: 0 auto;
   padding-bottom: 1.5rem;

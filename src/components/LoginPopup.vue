@@ -27,7 +27,6 @@
         </div>
       </div>
       <div v-if="activeTab === 'register'">
-        <!-- 註冊表單 -->
         <h3>註冊帳戶</h3>
         <div class="signin-form">
           <input v-model="registerName" type="text" placeholder="姓名" @blur="validateName(registerName)" :class="{ 'error': registerNameError }"/>
@@ -264,8 +263,17 @@ const showForgetPasswordPopup = () => {
 button {
   border-radius: inherit;
   color: #1d1d1d;
-  &.active {
-    border-bottom: 2px solid #1d1d1d;
+  &::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 2px;
+    background: #1d1d1d;
+    transition: width 0.3s;
+    margin-top: 5px;
+  }
+  &.active::after {
+    width: 100%;
   }
 }
 

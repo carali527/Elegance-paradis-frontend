@@ -6,7 +6,8 @@ import {
   updateCustomerInfo,
   fetchCategories,
   fetchAllProducts,
-  fetchProduct
+  fetchProduct,
+  fetchCartItems
 } from '@/api/index'
 
 export const useUserStore = defineStore('member', {
@@ -25,6 +26,7 @@ export const useUserStore = defineStore('member', {
     forgetPasswordPopupVisible: false,
     alertMessages: '',
     cart: [],
+    cartItems: 0,
     validateEmailPopupVisible: false,
     accessToken: null,
     refreshToken: null
@@ -61,7 +63,7 @@ export const useUserStore = defineStore('member', {
     async fetchProduct(categoryId) {
       try {
         const response = await fetchProduct(categoryId);
-        this.products = response.data;
+        this.product = response.data;
       } catch (error) {
         console.error('Error fetching product:', error);
       }
@@ -98,16 +100,16 @@ export const useUserStore = defineStore('member', {
         this.alertMessagesStatus = status;
       }
     },
-    addToCart(productID) {
-      this.cart.push(productID);
+    addToCart(number) {
+      this.cartItems = number;
 
       // 功能：未登入的情況下加入購物車，會先加入cookie，然後再使用者登入後帶進
-      if (!this.userInfo) {
-        let cart = VueCookies.get('cart') || [];
-        cart.push(productID);
-        VueCookies.set('cart', cart);
-        console.log('商品已添加到Cookie中的購物車');
-      }
+      // if (!this.userInfo) {
+      //   let cart = VueCookies.get('cart') || [];
+      //   cart.push(productID);
+      //   VueCookies.set('cart', cart);
+      //   console.log('商品已添加到Cookie中的購物車');
+      // }
     },
     unverifiedEmail({ status, email }) {
       this.accountStatus = status;
@@ -121,6 +123,17 @@ export const useUserStore = defineStore('member', {
     },
     isForgetPasswordPopupVisible(blooen) { 
       this.forgetPasswordPopupVisible = blooen;
-    }
+    },
+    async fetchCartItems(accountId) {
+      try {
+        const response = await fetchCartItems(accountId);
+        this.cart = response.data;
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      }
+    },
+    updateCartItems(cart) {
+      this.cart = cart;
+    },
   }
 })

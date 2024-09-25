@@ -1,13 +1,13 @@
 <template>
     <div class="products__item" ref="productItems">
       <div class="products__item-stick">
-        <a :href="`/perfume/${product.productId}`">
-          <i class="fa-regular fa-star"></i>
+        <a :href="`/fragrance/${product.productId}`">
+          <!-- <i class="fa-regular fa-star"></i> -->
           <img :src="product.productImageUrl" :alt="product.productName">
           <h3>{{ product.productName }}</h3>
           <span>{{ product.description }}</span>
         </a>
-        <span>NT$ {{ product.unitPrice }}</span>
+        <span>NT$ {{ formatCurrency(product.specList[0].unitPrice) }}</span>
         <button class="add-to-bag" @click="addToCart(product.productId)">
           <span>新增到購物車</span>
         </button>
@@ -17,13 +17,41 @@
 
 <script setup>
 import { useUserStore } from '../stores/userStore';
+import { fetchAddToCart } from '@/api/index';
 const userStore = useUserStore();
 const props = defineProps({
   product: Object
-})
+});
 
-const addToCart = (product) => {
-  userStore.addToCart(1);
+const addToCart = async (productId) => {
+  const accessToken = localStorage.getItem('accessToken');
+  
+  if (accessToken) {
+    try {
+      await fetchAddToCart({
+        accountId: userStore.userInfo.accountId,
+        specId: productId,
+        quantity: 1
+      });
+
+      userStore.isAlertMessagesShow({visible: true, message: '加入購物車成功', status: true});
+      userStore.addToCart(userStore.cartItems+1);
+    } catch (error) {
+      userStore.isAlertMessagesShow({visible: true, message: '加入購物車失敗', status: false});
+    }
+  }else {
+    document.querySelector('#loginButton').click();
+  }
+}
+
+const formatCurrency = (money) => {
+  const number = Number(money);
+
+  if (isNaN(number)) {
+    return '0'
+  }
+
+  return number.toLocaleString('en-US');
 }
 </script>
 
@@ -47,7 +75,6 @@ const addToCart = (product) => {
   }
   a {
     position: relative;
-    color: white;
     i.fa-star {
       position: absolute;
       right: 5px;

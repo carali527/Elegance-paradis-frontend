@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 const baseURL = import.meta.env.VITE_APP_API_BASE_URL || '/api';
 
 const apiClient = axios.create({
@@ -8,11 +9,9 @@ const apiClient = axios.create({
   }
 });
 
-// 全局變量，用於控制刷新 token 的狀態
 let isRefreshing = false;
 let failedQueue = [];
 
-// 用於處理請求隊列
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {
     if (error) {
@@ -21,14 +20,11 @@ const processQueue = (error, token = null) => {
       prom.resolve(token);
     }
   });
-
   failedQueue = [];
 };
 
-// 添加攔截器，把 token 添加到請求頭中
 apiClient.interceptors.request.use(config => {
   const token = localStorage.getItem('accessToken');
-
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
   }
@@ -37,62 +33,77 @@ apiClient.interceptors.request.use(config => {
   return Promise.reject(error);
 });
 
-apiClient.interceptors.response.use(response => {
-  return response;
-}, async error => {
-  const originalRequest = error.config;
-
-  if (error.response.status === 401 && !originalRequest._retry) {
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      }).then(token => {
-        originalRequest.headers['Authorization'] = 'Bearer ' + token;
-        return apiClient(originalRequest);
-      }).catch(err => {
-        return Promise.reject(err);
-      });
+apiClient.interceptors.response.use(
+  response => response,
+  async error => {
+    const originalRequest = error.config;
+    if (error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true; 
+      if (isRefreshing) {
+        return handleRequestQueue(originalRequest);
+      }
+      isRefreshing = true; 
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+        const newAccessToken = await refreshAccessToken();
+        processQueue(null, newAccessToken); 
+        originalRequest.headers['Authorization'] = 'Bearer ' + newAccessToken;
+      } catch (refreshError) {
+        processQueue(refreshError, null); 
+        handleLogout();
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false; 
+      }
     }
-
-    originalRequest._retry = true;
-    isRefreshing = true;
-
-    try {
-      const refreshToken = localStorage.getItem('refreshToken');
-      const response = await apiClient.post('/Auth/RefreshToken', {
-        refreshToken: refreshToken,
-      });
-
-      // 提取新的 accessToken 和 refreshToken
-      const { accessToken, refreshToken: newRefreshToken } = response.data;
-
-      // 更新 accessToken 和 refreshToken
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', newRefreshToken);
-
-      // 處理等待的請求隊列
-      processQueue(null, accessToken);
-
-      // 使用新的 accessToken 重試原始請求
-      originalRequest.headers['Authorization'] = 'Bearer ' + accessToken;
-      return apiClient(originalRequest);
-    } catch (err) {
-      processQueue(err, null);
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      window.location.href = '/login';  // 將用戶重定向到登入頁面
-      return Promise.reject(err);
-    } finally {
-      isRefreshing = false;
-    }
+    return Promise.reject(error); 
   }
+);
 
-  return Promise.reject(error);
-});
+function handleRequestQueue(originalRequest) {
+  return new Promise((resolve, reject) => {
+    failedQueue.push({ resolve, reject });
+  })
+  .then(token => {
+    originalRequest.headers['Authorization'] = 'Bearer ' + token;
+    return apiClient(originalRequest);
+  })
+  .catch(err=> {
+    Promise.reject(err)
+  });
+}
 
-// 將 apiClient 導出以便在其他地方使用
+async function refreshAccessToken() {
+  try {
+    const getRefreshToken = localStorage.getItem('refreshToken');
+    const getAccessToken = localStorage.getItem('accessToken');
+    const response = await apiClient.post('/Auth/RefreshToken', {
+      accessToken: getAccessToken, refreshToken: getRefreshToken
+    });
+    const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', newRefreshToken);
+
+    window.location.reload();
+  } catch (error) {
+    // localStorage.removeItem('accessToken');
+    // localStorage.removeItem('refreshToken');
+
+    throw error;
+  }
+}
+
+function handleLogout() {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  window.location.href = '/'; 
+}
+
 export default apiClient;
-
 
 export const createAccount = (accountData) => {
   return apiClient.post('/Account/CreateAccount', accountData);
@@ -101,10 +112,9 @@ export const createAccount = (accountData) => {
 export const login = (credentials) => {
   return apiClient.post('/Auth/Login', credentials)
     .then(response => {
-      const { accessToken, refreshToken } = response;
+      const { accessToken, refreshToken } = response.data;
 
       if (response.accountStatus !== 1){
-        // 存到 localStorage
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
       }
@@ -118,7 +128,8 @@ export const login = (credentials) => {
 
 export const logout = () => {
   const token = localStorage.getItem('accessToken');
-  return apiClient.post('/Auth/Logout', { token }).finally(() => {
+  return apiClient.post(`/Auth/Logout?refreshToken=${token}`)
+  .then(() => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
   });
@@ -162,4 +173,47 @@ export const fetchResetPassword = (password) => {
 
 export const fetchVerifyEmail = (encodingParameter) => {
   return apiClient.get(`/Account/VerifyEmail/${encodingParameter}`);
+};
+
+// 購物車
+export const fetchAddToCart = (item) => {
+  return apiClient.post('/Cart/AddCartItem', item);
+};
+
+export const fetchCartItems = (accountId) => {
+  return apiClient.get(`/Cart/GetCartItems/${accountId}`);
+};
+
+export const fetchUpdateCart = (detail) => {
+  return apiClient.patch('/Cart/UpdateCartItems', detail);
+};
+
+export const fetchCreateOrder = (order) => {
+  return apiClient.post('/Order/CreateOrder', order);
+};
+
+export const fetchDeleteCartItem = (order) => {
+  return apiClient.post('/Cart/DeleteCartItem', order);
+};
+
+// 訂單
+
+// 取得所有訂單
+export const fetchAllOrders = (accountId) => {
+  return apiClient.get(`/Order/GetOrderList/${accountId}`);
+};
+
+// 取得單筆訂單
+export const fetchOrder = (orderId) => {
+  return apiClient.get(`/Order/GetOrder?orderId=${orderId}`);
+};
+
+// GetOrderListByStatus
+export const fetchGetOrderListByStatus = (accountId) => {
+  return apiClient.get(`/Order/GetOrderListByStatus/${accountId}`);
+};
+
+// LinePay link
+export const fetchGetPayOrder = (orderId) => {
+  return apiClient.get(`/LinePay/PayOrder?orderId=${orderId}`);
 };

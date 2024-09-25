@@ -2,10 +2,10 @@
   <div class="dropdown">
     <div class="dropdown__options" @click="toggleDropdown">
       <div class="product__options-selected">
-        <span>{{ selected }}</span>
+        <span>{{ selectedSpecName }}</span>
       </div>
       <span class="dropdown__options-icon" :class="{ open: dropdownOpen }">
-        <svg class="svg-icon back" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"  width="24" height="24">
+        <svg class="svg-icon back" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
           <g id="4897" data-name="4897">
             <g id="close">
               <g id="4062" data-name="4062">
@@ -24,18 +24,28 @@
       </span>
     </div>
     <ul v-if="dropdownOpen" class="dropdown__options-menu">
-      <li v-for="(option, index) in computedOptions" :key="index" @click="selectItem(option)">{{ option }}</li>
+      <li 
+        v-for="(option, index) in computedOptions" 
+        :key="index" 
+        @click="handleClick(option)" 
+        :class="{ disabled: isOptionDisabled(option) }"
+      >
+        {{ option.specName }} <span v-if="isOptionDisabled(option)">(缺貨)</span>
+      </li>
     </ul>
   </div>
 </template>
-  
+
 <script setup>
 import { ref, watch, computed } from 'vue';
 
 const props = defineProps({
-  modelValue: [Number, String],
+  modelValue: {
+    type: [Object, Number, String], 
+    default: () => ({})
+  },
   options: {
-    type: [Array, String],
+    type: Array,
     default: () => []
   }
 });
@@ -45,10 +55,14 @@ const emits = defineEmits(['update:modelValue']);
 const dropdownOpen = ref(false);
 const selected = ref(props.modelValue);
 
-const computedOptions = computed(() => {
-  if (typeof props.options === 'string' && props.options === 'quantity') {
-    return Array.from({ length: 10 }, (_, i) => i + 1);
+const selectedSpecName = computed(() => {
+  if (selected.value.specName) {
+    return selected.value.specName;
   }
+  return '請選擇規格';
+});
+
+const computedOptions = computed(() => {
   return props.options;
 });
 
@@ -65,9 +79,27 @@ const selectItem = (item) => {
   emits('update:modelValue', item);
   dropdownOpen.value = false;
 };
+
+const handleClick = (option) => {
+  if (!isOptionDisabled(option)) {
+    selectItem(option);
+  }
+};
+
+const isOptionDisabled = (option) => {
+  return option.availableStock === 0;
+};
 </script>
 
 <style lang="scss" scoped>
+.dropdown__options-menu li.disabled {
+  color: gray;
+  cursor: not-allowed;
+}
+
+.dropdown__options-menu li:hover:not(.disabled) {
+  background-color: #f0f0f0;
+}
 .dropdown {
   position: relative;
 }

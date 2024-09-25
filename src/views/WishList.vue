@@ -14,64 +14,7 @@
 import Item from '../components/Item.vue'
 import { ref } from 'vue'
   
-const products = ref([
-  {
-    id: 1,
-    name: '香奈兒嘉柏麗香水1',
-    description: '香奈兒嘉柏麗隨機噴香霧',
-    price: '2,230',
-    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
-    isFaded: false
-  },
-  {
-    id: 2,
-    name: '香奈兒嘉柏麗香水2',
-    description: '香奈兒嘉柏麗流金隨身香水',
-    price: '5,700',
-    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
-    isFaded: false
-  },
-  {
-    id: 3,
-    name: '香奈兒嘉柏麗香水3',
-    description: '香奈兒嘉柏麗流金香水',
-    price: '4,800',
-    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
-    isFaded: false
-  },
-  {
-    id: 3,
-    name: '香奈兒嘉柏麗香水3',
-    description: '香奈兒嘉柏麗流金香水',
-    price: '4,800',
-    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
-    isFaded: false
-  },
-  {
-    id: 3,
-    name: '香奈兒嘉柏麗香水3',
-    description: '香奈兒嘉柏麗流金香水',
-    price: '4,800',
-    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
-    isFaded: false
-  },
-  {
-    id: 3,
-    name: '香奈兒嘉柏麗香水3',
-    description: '香奈兒嘉柏麗流金香水',
-    price: '4,800',
-    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
-    isFaded: false
-  },
-  {
-    id: 3,
-    name: '香奈兒嘉柏麗香水3',
-    description: '香奈兒嘉柏麗流金香水',
-    price: '4,800',
-    image: 'https://eleganceparadisapp.azurewebsites.net/images/item_1.webp',
-    isFaded: false
-  },
-]);
+const products = ref([]);
 </script>
   
 <style lang="scss" scoped>

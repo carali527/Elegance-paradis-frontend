@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import Fragrances from '@/views/Fragrances.vue'
-import Perfume from '@/views/Perfume.vue';
+import Fragrance from '@/views/Fragrance.vue';
 import Account from '@/views/Account.vue';
 import Orders from '@/views/Orders.vue';
-import ShoppingCart from '@/views/ShoppingCart.vue';
+import CartStep1 from '@/views/CartStep1.vue';
+import CartStep2 from '@/views/CartStep2.vue';
+import ConfirmPayment from '@/views/ConfirmPayment.vue';
 import WishList from '@/views/WishList.vue';
 import NotFound from '@/views/NotFound.vue';
 import VerifyEmail from '@/views/VerifyEmail.vue';
@@ -20,14 +22,14 @@ const router = createRouter({
       component: Home
     },
     {
-      path: '/fragrances/:id',
+      path: '/fragrances/:id/:subCategoryId?',
       name: 'Fragrances',
       component: Fragrances
     },
     {
-      path: '/perfume',
-      name: 'Perfume',
-      component: Perfume
+      path: '/fragrance/:id',
+      name: 'Fragrance',
+      component: Fragrance
     },
     {
       path: '/account',
@@ -40,9 +42,27 @@ const router = createRouter({
       component: Orders
     },
     {
-      path: '/cart',
-      name: 'ShoppingCart',
-      component: ShoppingCart
+      path: '/cart/step1',
+      name: 'CartStep1',
+      component: CartStep1
+    },
+    {
+      path: '/cart/step2',
+      name: 'CartStep2',
+      component: CartStep2,
+      beforeEnter: (to, from, next) => {
+        // 檢查是否從 /cart/step1 來
+        if (from.path === '/cart/step1') {
+          next(); // 允許導航
+        } else {
+          next('/cart/step1'); // 否則重定向到 /cart/step1
+        }
+      }
+    },
+    {
+      path: '/cart/finish',
+      name: 'ConfirmPayment',
+      component: ConfirmPayment
     },
     {
       path: '/wishlist',

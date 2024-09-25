@@ -354,7 +354,6 @@ const resetPassword = () => {
     .then(res => {
       userStore.closeAllPopup();
       userStore.isAlertMessagesShow({visible: true, message: '已成功寄送重置密碼信件！', status: true});
-      
     })
   }
 }

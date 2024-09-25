@@ -24,7 +24,9 @@ import ForgetPasswordPopup from './components/ForgetPasswordPopup.vue'
 import AlertMessages from './components/AlertMessages.vue'
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useUserStore } from './stores/userStore';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const userStore = useUserStore();
 const isMobile = ref(false);
 const isNavItemHidden = ref(false);
@@ -75,6 +77,20 @@ onMounted(async() => {
   if (userStore.validateEmailPopupVisible) {
     document.body.style.overflow = 'hidden'
   } 
+  const currentUrl = new URL(window.location.href);
+  if (currentUrl.searchParams.has('showLogin')) {
+    document.querySelector('#loginButton').click();
+
+    // 移除 'showLogin' 查詢參數並更新 URL
+    const currentRoute = router.currentRoute.value;
+    const query = { ...currentRoute.query }; // 複製當前查詢參數
+
+    // 刪除 `showLogin` 查詢參數
+    delete query.showLogin;
+
+    // 使用 router.replace 替換當前 URL，而不會重新載入頁面
+    router.replace({ query });
+  }
 });
 
 onUnmounted(() => {

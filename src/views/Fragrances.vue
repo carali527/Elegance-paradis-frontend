@@ -1,60 +1,65 @@
 <template>
   <div class="products__categories">
     <ul>
-      <li v-for="category in userStore.allCategories[0].subCategory" :key="category.name">
-        <button>
+      <li v-for="category in matchedSubCategories" :key="category.name">
+        <button @click="getCategoryItems(category.id)">
           <img :src="category.imageURL" :alt="category.name">
           <p>{{ category.name }}</p>
         </button>
       </li>
     </ul>
   </div>
-  <div class="products__list" ref="productList">
+  <Loading v-if="isLoading" />
+  <div v-if="!isLoading && productItems.length > 0" class="products__list">
     <Item
-        v-for="product in userStore.products" 
+        v-for="product in productItems" 
         :key="product.id"
         :product="product"
       />
+  </div>
+  <div v-else-if="!isLoading" class="products--none">
+    <p>此分類沒有相關商品</p>
   </div>
 </template>
 
 <script setup>
 import Item from '../components/Item.vue'
-import { ref, onMounted, onUnmounted } from 'vue';
+import Loading from '../components/Loading.vue';
+import { ref, onMounted, computed } from 'vue';
 import { useUserStore } from '../stores/userStore';
 import { useRoute } from 'vue-router'
+const isLoading = ref(true);
 
 const userStore = useUserStore();
-const productList = ref(null);
-const productItems = ref([]);
+const productItems = ref(userStore.products);
 const route = useRoute();
 const fragranceId = route.params.id;
+const subCategoryId = route.params.subCategoryId;
 
-const handleScroll = () => {
-  const windowHeight = window.innerHeight;
-  const scrollPosition = window.scrollY;
-
-  productItems.value.forEach(item => {
-    const itemTop = item.getBoundingClientRect().top + scrollPosition;
-    const itemBottom = itemTop + item.offsetHeight;
-    const itemCenter = (itemTop + itemBottom) / 2;
-
-    if (itemCenter >= scrollPosition + windowHeight / 3 && itemCenter <= scrollPosition + windowHeight) {
-      item.style.opacity = 1;
-    } else {
-      item.style.opacity = 0.5;
-    }
-  });
+const getCategoryItems = (id) => {
+  productItems.value = userStore.products.filter(product => product.categoryId == id);
 };
 
-onMounted(() => {
-  userStore.fetchAllProducts(fragranceId);
-  window.addEventListener('scroll', handleScroll);
-  handleScroll();
+const matchedSubCategories = computed(() => {
+  const matchedItem = userStore.allCategories.find(item => {
+    if (item.id == fragranceId){
+      return item
+    }
+  });
+  return matchedItem ? matchedItem.subCategory : [];
 });
 
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
+onMounted(async () => {
+  await userStore.fetchAllProducts(fragranceId); 
+  productItems.value = userStore.products;
+  if (subCategoryId) {
+    getCategoryItems(subCategoryId)
+    if (route.params.subCategoryId) {
+      const newUrl = `/fragrances/${route.params.id}`;
+      history.replaceState(null, '', newUrl); 
+    }
+  }
+  isLoading.value = false;
 });
 </script>
 
@@ -74,6 +79,9 @@ onUnmounted(() => {
       button:hover {
         p {
           font-weight: 400;
+        }
+        img {
+          transform: scale(1.1);
         }
       }
       img {
@@ -154,6 +162,11 @@ button.add-to-bag {
       height: auto;
     }
   }
+}
+
+.products--none {
+  margin-top: 40px;
+  margin-bottom: 80px;
 }
 
 @media (max-width: 1024px) {

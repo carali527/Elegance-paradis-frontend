@@ -7,9 +7,9 @@
     <p class="section__title">EleganceParadis Fragrance, Elevate Your Elegance</p>
   </section>
   <section v-for="category in userStore.allCategories" :key="category.id" class="section__img" v-bg-parallax="[45, 100]" :style="{ backgroundImage: `url(${category.imageURL})` }">
-    <div class="section__title--bg">
+    <a class="section__title--bg" :href="`/fragrances/${category.id}`">
       <p class="section__title section__title--headline">{{ category.name }}</p>
-    </div>
+    </a>
   </section>
 </template>
 
@@ -197,6 +197,7 @@ section {
 
 .section__img {
   background-repeat: no-repeat;
+  background-position: center;
   &:first-of-type {
     color: #ffffff;
     background-position: center;

@@ -1,59 +1,62 @@
 <template>
-  <header class="header" :class="{ 'header__bottom': isNavItemHidden }">
-    <div class="header__top-bar">
-      <div class="header__icons">
-        <span class="header__menu-icon" @click="toggleMenu"><i class="fas fa-bars"></i></span>
+  <div>
+    <div v-if="isMenuOpen" class="overlay" @click="toggleMenu"></div>
+    <header class="header" :class="{ 'header__bottom': isNavItemHidden }">
+      <div class="header__top-bar">
+        <div class="header__icons">
+          <span class="header__menu-icon" @click="toggleMenu"><i class="fas fa-bars"></i></span>
+        </div>
+        <a href="/" class="header__logo">
+          <span>Elegance Paradis</span>
+        </a>
+        <div>
+          <ul class="nav-right">
+            <li v-if="!userStore.userInfo">
+              <span class="header__icon" @click="showMemberPopup" id="loginButton">
+                <i class="fa-regular fa-user"></i>
+              </span>
+            </li>
+            <li v-if="userStore.userInfo" @mouseover="activeMemberDropdown = true" @mouseleave="activeMemberDropdown = false" @click="toggleMemberDropdown"> 
+              <span class="header__icon"> 
+                <i class="fa fa-user"></i> 
+              </span> 
+              <div v-if="activeMemberDropdown" class="member-dropdown"> 
+                <a href="/account">會員帳號</a> 
+                <a href="/orders">我的訂單</a> 
+                <button @click="handleLogout">登出</button> 
+              </div> 
+            </li>
+            <li>
+              <a href="/cart/step1" class="header__icon"><i class="fas fa-shopping-bag"></i></a>
+              <span v-if="!isCartPage && userStore.cartItems > 0 && userStore.cartItems <= 99" class="header__count">{{ userStore.cartItems }}</span>
+              <span v-if="!isCartPage && userStore.cartItems >= 100" class="header__count">99+</span>
+            </li>
+          </ul>
+        </div>
       </div>
-      <a href="/" class="header__logo">
-        <span>Elegance Paradis</span>
-      </a>
-      <div>
-        <ul class="nav-right">
-          <li v-if="!userStore.userInfo">
-            <span class="header__icon" @click="showMemberPopup">
-              <i class="fa-regular fa-user"></i>
-            </span>
-          </li>
-          <li v-if="userStore.userInfo" @mouseover="activeMemberDropdown = true" @mouseleave="activeMemberDropdown = false" @click="toggleMemberDropdown"> 
-            <span class="header__icon"> 
-              <i class="fa fa-user"></i> 
-            </span> 
-            <div v-if="activeMemberDropdown" class="member-dropdown"> 
-              <a href="/account">會員帳號</a> 
-              <a href="/orders">訂單帳號</a> 
-              <button @click="handleLogout">登出</button> 
-            </div> 
-          </li>
-          <li>
-            <a href="/cart" class="header__icon"><i class="fas fa-shopping-bag"></i></a>
-            <span class="header__count" v-if="userStore.cart.length > 0 && userStore.cart.length <= 99 ">{{ userStore.cart.length }}</span>
-            <span class="header__count" v-if="userStore.cart.length >= 100">99+</span>
+      <nav :class="{ 'nav__item--hidden': isNavItemHidden && !isMobile, 'nav__item--active': isMenuOpen }">
+        <ul class="nav__links">
+          <li v-for="category in userStore.allCategories" :key="category.id" class="nav__item" @mouseover="activeDropdown = category.id" @mouseleave="activeDropdown = null">
+            <a class="nav__link" :href="`/fragrances/${category.id}`">{{ category.name }}</a>
+            <div class="nav__dropdown" v-if="activeDropdown === category.id || isMobile">
+              <ul>
+                <li v-for="subCategory in category.subCategory" :key="subCategory.id">
+                  <a :href="`/fragrances/${category.id}/${subCategory.id}`" @click="closeMenuOnMobile">{{ subCategory.name }}</a>
+                </li>
+              </ul>
+            </div>
           </li>
         </ul>
-      </div>
-    </div>
-    <nav :class="{ 'nav__item--hidden': isNavItemHidden && !isMobile, 'nav__item--active': isMenuOpen }">
-      <ul class="nav__links">
-        <li v-for="category in userStore.allCategories" :key="category.id" class="nav__item" @mouseover="activeDropdown = category.id" @mouseleave="activeDropdown = null">
-          <a class="nav__link" :href="`/fragrances/${category.id}`">{{ category.name }}</a>
-          <div class="nav__dropdown" v-if="activeDropdown === category.id || isMobile">
-            <ul>
-              <li v-for="subCategory in category.subCategory" :key="subCategory.id">
-                <a :href="`/fragrances/${subCategory.id}`" @click="closeMenuOnMobile">{{ subCategory.name }}</a>
-              </li>
-            </ul>
-          </div>
-        </li>
-      </ul>
-    </nav>
-  </header>
+      </nav>
+    </header>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useUserStore } from '../stores/userStore';
 import { logout } from '@/api/index';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 const router = useRouter();
 const userStore = useUserStore();
 const isMenuOpen = ref(false);
@@ -61,11 +64,18 @@ const activeDropdown = ref(null);
 const activeMemberDropdown = ref(false);
 const isMobile = ref(false);
 const isNavItemHidden = ref(false);
+const route = useRoute();
+const isCartPage = ref(true);
 
 let lastScrollY = window.scrollY;
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
+  if (isMenuOpen.value) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
 };
 
 const closeMenuOnMobile = () => {
@@ -95,10 +105,28 @@ const handleScroll = () => {
 
 const handleLogout = async () => {
   await logout(localStorage.getItem('refreshToken'))
-  router.replace('/').then(() => {
+  .then(() => {
     window.location.reload();
   });
 }
+
+watch(
+  () => userStore.userInfo,
+  async (newUserInfo) => {
+    if (newUserInfo) {
+      await userStore.fetchCartItems(userStore.userInfo.accountId);
+      const totalQuantity = userStore.cart.cartItems.reduce((acc, item) => acc + item.quantity, 0);
+      userStore.addToCart(totalQuantity);
+    }
+  }
+);
+
+watch(
+  () => route.path,
+  (newPath) => {
+    isCartPage.value = newPath.includes('/cart');
+  }
+);
 
 onMounted(() => {
   updateIsMobile();
@@ -291,6 +319,15 @@ ul.nav-right {
       }
     }
   }
+}
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999; 
 }
 
 @media (max-width: 768px) {
